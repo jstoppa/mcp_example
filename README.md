@@ -1,7 +1,5 @@
 # Model Context Protocol (MCP) Example Implementation
 
-> **Status**: Development Stopped/Archived (Last update: 1 file changed)
-
 This repository demonstrates the implementation of the Model Context Protocol (MCP), a standardized approach for managing context in AI/ML models.
 
 ## Overview
