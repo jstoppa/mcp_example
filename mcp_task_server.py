@@ -1,46 +1,42 @@
 from mcp.server.fastmcp import FastMCP
-from transformers import pipeline
+import sys
 
-# Sample task titles
-tasks = ["Plan meeting", "Write report", "Call client"]
-
-# Set up the LLM pipeline (using GPT-2)
-generator = pipeline("text-generation", model="gpt2")
+# Sample tasks with titles and descriptions
+tasks = [
+    {"title": "Plan meeting", "description": "Schedule team sync meeting"},
+    {"title": "Write report", "description": "Complete quarterly report"},
+    {"title": "Call client", "description": "Follow up on project requirements"}
+]
 
 # Create a FastMCP server instance
-mcp = FastMCP(name="LLMTaskServer")
+mcp = FastMCP(name="TaskServer")
 
-# Define a prompt: template for the LLM to generate a task description
+# Define a prompt: template for task creation
 @mcp.prompt("task_description")
-def task_description(params):
-    return f"Based on the task title '{params.get('task_title', 'Unnamed task')}', generate a detailed description"
+def task_description(task_title="Unnamed task"):
+    return f"Based on the task title '{task_title}', generate a detailed description"
 
-# Define a tool: generate a task description using the LLM
-@mcp.tool("generate_description")
-def generate_description(params):
+# Define a tool: add a new task to the list
+@mcp.tool("add_task")
+def add_task(params):
     task_title = params.get("task_title", "Unnamed task")
-    # Use the LLM to generate a description
-    prompt = f"Describe the task: {task_title}"
-    result = generator(prompt, max_length=50, num_return_sequences=1)[0]["generated_text"]
-    return {"task_title": task_title, "description": result.strip()}
-    
+    task_description = params.get("description", "No description provided")
+    new_task = {"title": task_title, "description": task_description}
+    tasks.append(new_task)
+    return {"task": new_task, "success": True}
 
 # Define a resource: expose a list of task titles to the client
 @mcp.resource("tasks://list")
 def get_task_titles():
     return {"tasks": tasks, "count": len(tasks)}
 
-
-
-
 if __name__ == "__main__":
-    print("Starting LLMTaskServer...")
+    print("Starting TaskServer...", file=sys.stderr)
     try:
-        # Run directly without asyncio.run()
-        mcp.run()  
+        mcp.run()
     except KeyboardInterrupt:
-        print("\nShutting down server...")
+        print("\nShutting down server...", file=sys.stderr)
     except Exception as e:
-        print(f"Error occurred: {e}")
+        print(f"Error occurred: {e}", file=sys.stderr)
     finally:
-        print("Server stopped")
+        print("Server stopped", file=sys.stderr)

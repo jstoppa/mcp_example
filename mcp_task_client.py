@@ -13,11 +13,11 @@ async def run():
             # Initialize the connection
             await session.initialize()
 
-                # List available prompts
+            # List available prompts
             prompts = await session.list_prompts()
 
             # Get a prompt
-            prompt = await session.get_prompt("review_task", arguments={"task_title": "Plan meeting"})
+            prompt = await session.get_prompt("task_description", {"task_title": "Plan lunch"})
 
             # List available resources
             resources = await session.list_resources()
@@ -29,9 +29,7 @@ async def run():
             content, mime_type = await session.read_resource("tasks://list")
 
             # Call a tool
-            result = await session.call_tool("generate_description", arguments={"task_title": "Plan meeting"})
-
-            print(result)
+            result = await session.call_tool("add_task", {"params": {"task_title": "Order food"}})
 
 if __name__ == "__main__":
     import asyncio
