@@ -8,15 +8,15 @@ async def run():
         async with ClientSession(read, write) as session:
             await session.initialize()
             
-            # Get and display current tasks
+            # Get task description suggestion using prompt
+            prompt_result = await session.get_prompt("task_description", {"task_title": "Do shopping"})
+            print(f"\nSuggested description: {prompt_result.messages[0].content.text}")
+            
+            # Display all tasks
             response = await session.read_resource("tasks://list")
             tasks = json.loads(json.loads(response.contents[0].text)['contents'][0]['text'])
             for task in tasks['tasks']:
                 print(f"• {task['title']}: {task['description']}")
-            
-            # Get task description suggestion using prompt
-            prompt_result = await session.get_prompt("task_description", {"task_title": "Buy groceries"})
-            print(f"\nSuggested description: {prompt_result}")
             
             # Add a new task
             await session.call_tool("add_task", {
@@ -25,6 +25,12 @@ async def run():
                     "description": "Order lunch from the local restaurant"
                 }
             })
+
+            # Display again all tasks
+            response = await session.read_resource("tasks://list")
+            tasks = json.loads(json.loads(response.contents[0].text)['contents'][0]['text'])
+            for task in tasks['tasks']:
+                print(f"• {task['title']}: {task['description']}")
 
 if __name__ == "__main__":
     asyncio.run(run())

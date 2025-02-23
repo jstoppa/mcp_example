@@ -1,5 +1,4 @@
 from mcp.server.fastmcp import FastMCP
-import sys
 import json
 
 # Sample tasks with titles and descriptions
