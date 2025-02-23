@@ -10,15 +10,41 @@ server_params = StdioServerParameters(
 
 def get_tasks_from_content(content):
     try:
-        if isinstance(content, tuple) and len(content) == 2:
-            meta, contents = content
-            if isinstance(contents, list) and len(contents) > 0:
-                content_item = contents[0]
-                if hasattr(content_item, 'text'):
-                    return json.loads(content_item.text)
-        return None
+        # First level: Get the contents array from the ReadResourceResult
+        if not hasattr(content, 'contents') or not content.contents:
+            print("No contents found in response")
+            return None
+            
+        # Get the first content item which contains our text
+        content_item = content.contents[0]
+        if not hasattr(content_item, 'text'):
+            print("Content item does not have text")
+            return None
+            
+        # First JSON parse: Parse the outer JSON structure
+        outer_json = json.loads(content_item.text)
+        if not isinstance(outer_json, dict) or 'contents' not in outer_json:
+            print("Invalid outer JSON structure")
+            return None
+            
+        # Get the inner content item
+        inner_contents = outer_json['contents']
+        if not isinstance(inner_contents, list) or not inner_contents:
+            print("No inner contents found")
+            return None
+            
+        inner_content = inner_contents[0]
+        if 'text' not in inner_content:
+            print("Inner content does not have text")
+            return None
+            
+        # Second JSON parse: Parse the actual tasks data
+        return json.loads(inner_content['text'])
     except Exception as e:
         print(f"Error parsing tasks: {e}")
+        print(f"Error type: {type(e)}")
+        import traceback
+        traceback.print_exc()
         return None
 
 def print_section(title):
@@ -33,8 +59,8 @@ async def run():
 
             # Show current tasks
             print_section("Current Tasks")
-            content, _ = await session.read_resource("tasks://list")
-            tasks = get_tasks_from_content(content)
+            response = await session.read_resource("tasks://list")
+            tasks = get_tasks_from_content(response)  # Pass the response directly
             if tasks and 'tasks' in tasks:
                 for task in tasks['tasks']:
                     print(f"• {task['title']}")
@@ -55,8 +81,8 @@ async def run():
 
             # Show updated task list
             print_section("Updated Tasks")
-            content, _ = await session.read_resource("tasks://list")
-            tasks = get_tasks_from_content(content)
+            response = await session.read_resource("tasks://list")
+            tasks = get_tasks_from_content(response)  # Pass the response directly
             if tasks and 'tasks' in tasks:
                 for task in tasks['tasks']:
                     print(f"• {task['title']}")
