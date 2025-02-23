@@ -2,6 +2,8 @@
 
 This repository demonstrates the implementation of the Model Context Protocol (MCP), a standardized approach for managing context in AI/ML models.
 
+To get more details, look at the post [How to create an MCP server and client with an LLM](https://jstoppa.com/posts/how-to-create-a-model-context-protocol-mcp-to-give-context-to-an-llm/post/)
+
 ## Overview
 
 MCP (Model Context Protocol) is a protocol designed to standardize how context is handled when working with AI/ML models. This example repository shows how to implement and use MCP in your projects.

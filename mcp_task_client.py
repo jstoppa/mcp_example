@@ -9,15 +9,19 @@ async def run():
             await session.initialize()
             
             # Get task description suggestion using prompt
+            print("Getting prompt...")
             prompt_result = await session.get_prompt("task_description", {"task_title": "Do shopping"})
-            print(f"\nSuggested description: {prompt_result.messages[0].content.text}")
+            print(f"Suggested description: {prompt_result.messages[0].content.text}")
             
             # Display all tasks
+            print("\nDisplaying all tasks...")
             response = await session.read_resource("tasks://list")
             tasks = json.loads(json.loads(response.contents[0].text)['contents'][0]['text'])
             for task in tasks['tasks']:
                 print(f"• {task['title']}: {task['description']}")
             
+            
+            print("\nAdding new task....")
             # Add a new task
             await session.call_tool("add_task", {
                 "params": {
@@ -25,7 +29,10 @@ async def run():
                     "description": "Order lunch from the local restaurant"
                 }
             })
+            print("Task added!")
 
+
+            print("\nDisplaying all tasks again...")
             # Display again all tasks
             response = await session.read_resource("tasks://list")
             tasks = json.loads(json.loads(response.contents[0].text)['contents'][0]['text'])
